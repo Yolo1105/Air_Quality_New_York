@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html>
+  <h1>New York Map</h1>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+  <div id="map" style="width: 700px; height: 500px"></div>
+
+  <h3>Search/Filter Engine</h3>
+  <!--These are the code for filter-->
+  <head>
+    <title>CSV Table Example</title>
+  </head>
+  <body>
+    <div>
+      <label for="filterHeader">Time Period:</label>
+      <input type="text" id="filterHeader" name="filterHeader" required />
+    </div>
+    <div>
+      <label for="filterCriteria">Specific Time:</label>
+      <input type="text" id="filterCriteria" name="filterCriteria" required />
+    </div>
+    <br />
+    <div>
+      <label for="filterHeader2">Geo Place Name:</label>
+      <input type="text" id="filterHeader2" name="filterHeader2" required />
+    </div>
+    <div>
+      <label for="filterCriteria2">Specific place name:</label>
+      <input type="text" id="filterCriteria2" name="filterCriteria2" required />
+    </div>
+    <br />
+    <div>
+      <label for="filterHeader3">Polluation:</label>
+      <input type="text" id="filterHeader3" name="filterHeader3" required />
+    </div>
+    <div>
+      <label for="filterCriteria3">Polluation type:</label>
+      <input type="text" id="filterCriteria3" name="filterCriteria3" required />
+    </div>
+    <br />
+    <button onclick="applyFilter()">Filter</button>
+    <br />
+  </body>
+  <br />
+  <body>
+    <table id="csvTable">
+      <!-- table content will be dynamically generated -->
+    </table>
+    <script>
+      var headers;
+      // Function to read CSV file and convert to array of objects
+      function parseCSV(csv) {
+        var lines = csv.split("\n");
+        var result = [];
+        headers = lines[0].split(",");
+        for (var i = 1; i < lines.length; i++) {
+          var obj = {};
+          var currentline = lines[i].split(",");
+          for (var j = 0; j < headers.length; j++) {
+            obj[headers[j]] = currentline[j];
+          }
+          result.push(obj);
+        }
+        return result;
+      }
+
+      // Function to generate HTML table from array of objects
+      function generateTable(data) {
+        var table = document.getElementById("csvTable");
+        var headers = Object.keys(data[0]);
+        var headerRow = document.createElement("tr");
+        for (var i = 0; i < headers.length; i++) {
+          var headerCell = document.createElement("th");
+          headerCell.textContent = headers[i];
+          headerRow.appendChild(headerCell);
+        }
+        table.appendChild(headerRow);
+        for (var i = 0; i < data.length; i++) {
+          var row = document.createElement("tr");
+          for (var j = 0; j < headers.length; j++) {
+            var cell = document.createElement("td");
+            cell.textContent = data[i][headers[j]];
+            row.appendChild(cell);
+          }
+          table.appendChild(row);
+        }
+      }
+
+      function applyFilter() {
+        // function applyFilter(filterField, filterValue) {
+        var filterField = document.getElementById("filterHeader").value;
+        var filterValue = document.getElementById("filterCriteria").value;
+        var filterField2 = document.getElementById("filterHeader2").value;
+        var filterValue2 = document.getElementById("filterCriteria2").value;
+        var filterField3 = document.getElementById("filterHeader3").value;
+        var filterValue3 = document.getElementById("filterCriteria3").value;
+
+        var table = document.getElementById("csvTable");
+        var rows = table.getElementsByTagName("tr");
+        for (var i = 1; i < rows.length; i++) {
+          var cells = rows[i].getElementsByTagName("td");
+          var fieldValue = cells[headers.indexOf(filterField)].textContent;
+          var fieldValue2 = cells[headers.indexOf(filterField2)].textContent;
+          var fieldValue3 = cells[headers.indexOf(filterField3)].textContent;
+          if (
+            (fieldValue === filterValue) &
+            (fieldValue2 === filterValue2) &
+            (fieldValue3 === filterValue3)
+          ) {
+            rows[i].style.display = "";
+          } else {
+            rows[i].style.display = "none";
+          }
+        }
+      }
+      // Load CSV file and generate HTML table
+      fetch("Air_Quality.csv")
+        .then((response) => response.text())
+        .then((csv) => {
+          var data = parseCSV(csv);
+          generateTable(data);
+          //applyFilter();
+        })
+        .catch((error) => console.error(error));
+
+      // filter
+    </script>
+  </body>
+
+  <body>
+    <div id="map"></div>
+    <script>
+      var map = L.map("map").setView([0, 0], 1);
+      L.tileLayer(
+        "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=CCPv8av6a8aHdEIOrM8N",
+        {
+          attribution:
+            '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+        }
+      ).addTo(map);
+      const customIcon = L.icon({
+        iconUrl: "./pointer.svg",
+        iconSize: [40, 40],
+      });
+      L.Control.geocoder().addTo(map);
+      map.setView([40.694, -73.9829], 10);
+
+      L.marker([40.5755438, -73.9707016], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Coney Island (CD13)</b>`)
+        .addTo(map);
+
+      L.marker([40.8447819, -73.8648268], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Bronx</b> `)
+        .addTo(map);
+
+      L.marker([40.846654, -73.8594241], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Morris Park and Bronxdale (CD11)</b> `
+        )
+        .addTo(map);
+
+      L.marker([40.8787602, -73.8528356], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Williamsbridge and Baychester (CD12)</b> `
+        )
+        .addTo(map);
+
+      L.marker([40.6781784, -73.9441579], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Brooklyn</b>`)
+        .addTo(map);
+
+      L.marker([40.7304701, -73.9515032], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Greenpoint and Williamsburg (CD1)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.6920638, -73.9741874], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Fort Greene and Brooklyn Heights (CD2)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.6872176, -73.9417735], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Bedford Stuyvesant (CD3)</b>`)
+        .addTo(map);
+
+      L.marker([40.6957755, -73.9170604], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> MBushwick (CD4)</b>`)
+        .addTo(map);
+
+      L.marker([40.6501402, -73.8837345], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> East New York and Starrett City (CD5)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.6710672, -73.9814228], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Park Slope and Carroll Gardens (CD6)</b> `
+        )
+        .addTo(map);
+
+      L.marker([40.65272, -74.0093348], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Sunset Park (CD7)</b> `)
+        .addTo(map);
+
+      L.marker([40.6694022, -73.9422324], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Crown Heights and Prospect Heights (CD8)</b> `
+        )
+        .addTo(map);
+
+      L.marker([40.8458359, -73.8919962], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Belmont and East Tremont (CD6)</b> `
+        )
+        .addTo(map);
+
+      L.marker([40.8711235, -73.8976328], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Kingsbridge Heights and Bedford (CD7)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.8876785 - 73.9133783], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Kingsbridge - Riverdale</b> `)
+        .addTo(map);
+
+      L.marker([40.8447819, -73.8648268], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Northeast Bronx</b> `)
+        .addTo(map);
+
+      L.marker([40.8592667, -73.8984694], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Fordham - Bronx Pk </b> `)
+        .addTo(map);
+
+      L.marker([40.818399, -73.8213213], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Pelham - Throgs Neck</b> `)
+        .addTo(map);
+
+      L.marker([40.8416443, -73.8859307], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Crotona -Tremont</b> `)
+        .addTo(map);
+
+      L.marker([40.8310814, -73.9058574], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> High Bridge - Morrisania</b>`)
+        .addTo(map);
+
+      L.marker([40.8094385, -73.8803315], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Hunts Point - Mott Haven</b> `)
+        .addTo(map);
+
+      L.marker([40.7304701, -73.9515032], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Greenpoint</b>`)
+        .addTo(map);
+
+      L.marker([33.4969375, -73.0676875], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Downtown - Heights - Slope</b>`)
+        .addTo(map);
+
+      L.marker([40.6590529, -73.8759245], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> East New York</b>`)
+        .addTo(map);
+
+      L.marker([40.65272, -74.0093348], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Sunset Park</b>`)
+        .addTo(map);
+
+      L.marker([40.6350319, -73.9921028], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Borough Park</b>`)
+        .addTo(map);
+
+      L.marker([40.6342338, -73.9491561], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> East Flatbush - Flatbush</b>`)
+        .addTo(map);
+
+      L.marker([40.6402325, -73.9060579], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Canarsie - Flatlands</b>`)
+        .addTo(map);
+
+      L.marker([40.6158056, -73.9999512], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Bensonhurst - Bay Ridge</b>`)
+        .addTo(map);
+
+      L.marker([40.5755438, -73.9707016], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Coney Island - Sheepshead Bay</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.7081156, -73.9570696], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Williamsburg - Bushwick</b>`)
+        .addTo(map);
+
+      L.marker([40.8417082, -73.9393554], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Washington Heights</b>`)
+        .addTo(map);
+
+      L.marker([40.7957399, -73.9389213], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> East Harlem</b>`)
+        .addTo(map);
+
+      L.marker([40.8089419, -73.9482305], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Central Harlem - Morningside Heights</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.7957399, -73.9389213], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> East Harlem</b>`)
+        .addTo(map);
+
+      L.marker([40.7870106, -73.9753676], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Upper West Side</b>`)
+        .addTo(map);
+
+      L.marker([40.7735649, -73.9565551], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Upper East Side</b>`)
+        .addTo(map);
+
+      L.marker([40.7367783, -73.9844722], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Gramercy Park - Murray Hill</b>`)
+        .addTo(map);
+
+      L.marker([40.7335719, -74.0027418], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Greenwich Village - SoHo</b>`)
+        .addTo(map);
+
+      L.marker([40.715033, -73.9842724], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b>Union Square - Lower East Side </b>`
+        )
+        .addTo(map);
+
+      L.marker([40.7208595, -74.0006686], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Lower Manhattan</b>`)
+        .addTo(map);
+
+      L.marker([40.744679, -73.9485424], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b>Long Island City - Astoria </b>`)
+        .addTo(map);
+
+      L.marker([40.7282239, -73.7948516], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> West Queens</b>`)
+        .addTo(map);
+
+      L.marker([40.7674987, -73.833079], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Flushing - Clearview</b>`)
+        .addTo(map);
+
+      L.marker([40.7640151, -73.7433727], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Bayside - Little Neck</b>`)
+        .addTo(map);
+
+      L.marker([36.0736076, -86.8550296], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b>Ridgewood - Forest Hills </b>`)
+        .addTo(map);
+
+      L.marker([40.7335179, -73.7801447], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Fresh Meadows</b>`)
+        .addTo(map);
+
+      L.marker([40.8980519, -73.9014047], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Riverdale and Fieldston (CD8)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.7282239, -73.7948516], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Southwest Queens</b>`)
+        .addTo(map);
+
+      L.marker([18.109581, -77.297508], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b>Jamaica </b>`)
+        .addTo(map);
+
+      L.marker([41.3917065, -73.6300729], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Southeast Queens</b>`)
+        .addTo(map);
+
+      L.marker([40.5831668, -73.8153597], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Rockaways</b>`)
+        .addTo(map);
+
+      L.marker([39.9885174, -75.1063473], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Port Richmond</b>`)
+        .addTo(map);
+
+      L.marker([40.6270217, -74.0783309], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Stapleton - St. George</b>`)
+        .addTo(map);
+
+      L.marker([41.7697533, -87.9358931], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Willowbrook</b>`)
+        .addTo(map);
+
+      L.marker([40.5083408, -74.2355404], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> South Beach - Tottenville</b>`)
+        .addTo(map);
+
+      L.marker([40.7127753, -74.0059728], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> New York City</b>`)
+        .addTo(map);
+
+      L.marker([40.7830603, -73.9712488], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Manhattan</b>`)
+        .addTo(map);
+
+      L.marker([40.7282239, -73.7948516], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Queens</b>`)
+        .addTo(map);
+
+      L.marker([40.5795317, -74.1502007], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Staten Island</b>`)
+        .addTo(map);
+
+      L.marker([40.8382522, -73.8566087], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Parkchester and Soundview (CD9)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.6139307, -73.9921833], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Bensonhurst (CD11)</b>`)
+        .addTo(map);
+
+      L.marker([40.818399, -73.8213213], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Throgs Neck and Co-op City (CD10)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.7077143, -74.0082787], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Financial District (CD1)</b>`)
+        .addTo(map);
+
+      L.marker([40.7335719, -74.0027418], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Greenwich Village and Soho (CD2)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.715033, -73.9842724], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Lower East Side and Chinatown (CD3)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.7316903, -73.9778494], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Stuyvesant Town and Turtle Bay (CD6)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.7870106, -73.9753676], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Upper West Side (CD7)</b>`)
+        .addTo(map);
+
+      L.marker([40.7735649, -73.9565551], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Upper East Side (CD8)</b>`)
+        .addTo(map);
+
+      L.marker([40.8105443, -73.9620581], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Morningside Heights and Hamilton Heights (CD9)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.8089419, -73.9482305], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Central Harlem (CD10)</b>`)
+        .addTo(map);
+
+      L.marker([40.7957399, -73.9389213], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> East Harlem (CD11)</b>`)
+        .addTo(map);
+
+      L.marker([40.8417082, -73.9393554], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Washington Heights and Inwood (CD12)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.8091068, -73.9228881], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Mott Haven and Melrose (CD1)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.8094385, -73.8803315], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Hunts Point and Longwood (CD2)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.8310814, -73.9058574], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Morrisania and Crotona (CD3)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.836916, -73.9271294], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Highbridge and Concourse (CD4)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.8624843, -73.9141891], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Fordham and University Heights (CD5)</b>`
+        )
+        .addTo(map);
+
+      L.marker([36.0736076, -86.8550296], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> </b>`)
+        .addTo(map);
+
+      L.marker([40.6592355, -73.9533895], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> South Crown Heights and Lefferts Gardens (CD9)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.620305, -74.007438], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Bay Ridge and Dyker Heights (CD10)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.6350319, -73.9921028], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b>Borough Park (CD12) </b>`)
+        .addTo(map);
+
+      L.marker([40.6595023, -73.9605783], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Flatbush and Midwood (CD14)</b>`)
+        .addTo(map);
+
+      L.marker([40.5953955, -73.9457538], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Sheepshead Bay (CD15)</b>`)
+        .addTo(map);
+
+      L.marker([25.9017472, -97.4974838], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Brownsville (CD16)</b>`)
+        .addTo(map);
+
+      L.marker([40.6481656, -73.9299899], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> East Flatbush (CD17)</b>`)
+        .addTo(map);
+
+      L.marker([40.6402325, -73.9060579], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Flatlands and Canarsie (CD18)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.744679, -73.9485424], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b>Long Island City and Astoria (CD1) </b>`
+        )
+        .addTo(map);
+
+      L.marker([38.714394, -77.7824978], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Woodside and Sunnyside (CD2)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.7556818, -73.8830701], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Jackson Heights (CD3)</b>`)
+        .addTo(map);
+
+      L.marker([40.7294018, -73.9065883], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Ridgewood and Maspeth (CD5)</b>`)
+        .addTo(map);
+
+      L.marker([40.7255722, -73.8624893], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Rego Park and Forest Hills (CD6)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.7335179, -73.7801447], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Hillcrest and Fresh Meadows (CD8)</b>`
+        )
+        .addTo(map);
+      L.marker([51.477851, -0.2907179], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Kew Gardens and Woodhaven (CD9)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.6764003, -73.8124984], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> South Ozone Park and Howard Beach (CD10)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.7640151, -73.7433727], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Bayside and Little Neck (CD11)</b>`
+        )
+        .addTo(map);
+
+      L.marker([18.109581, -77.297508], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Jamaica and Hollis (CD12)</b>`)
+        .addTo(map);
+
+      L.marker([40.7156628, -73.7419017], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b> Queens Village (CD13)</b>`)
+        .addTo(map);
+
+      L.marker([40.6079998, -73.8158045], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Rockaway and Broad Channel (CD14)</b>`
+        )
+        .addTo(map);
+
+      L.marker([37.0965278, -113.5684164], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> St. George and Stapleton (CD1)</b>`
+        )
+        .addTo(map);
+
+      L.marker([37.0965278, -113.5684164], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> St. George and Stapleton (CD1)</b>`
+        )
+        .addTo(map);
+
+      L.marker([25.7826123, -80.1340772], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> South Beach and Willowbrook (CD2)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.5083408, -74.2355404], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b> Tottenville and Great Kills (CD3)</b>`
+        )
+        .addTo(map);
+
+      L.marker([40.7735649, -73.9565551], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b>Upper East Side-Gramercy</b>`)
+        .addTo(map);
+
+      L.marker([35.1291161, -106.564816], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b>Chelsea-Village</b>`)
+        .addTo(map);
+
+      L.marker([40.7345702, -73.991862], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b>Union Square-Lower Manhattan</b>`)
+        .addTo(map);
+
+      L.marker([40.7335179, -73.7801447], {
+        icon: customIcon,
+      })
+        .bindPopup(
+          `<span class = "popup"> <b>Bayside Little Neck-Fresh Meadows</b>`
+        )
+        .addTo(map);
+
+      L.marker([43.7844397, -88.7878678], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b>Northern SI</b>`)
+        .addTo(map);
+
+      L.marker([40.81767, -73.9184261], {
+        icon: customIcon,
+      })
+        .bindPopup(`<span class = "popup"> <b>South Bronx</b>`)
+        .addTo(map);
+
+      var searchLayer = L.geoJson().addTo(map);
+      //... adding data in searchLayer ...
+      L.map("map", { searchControl: { layer: searchLayer } }); 
+    </script>
+  </body>
+
+  <body>
+    <table id="csvTable">
+      <!-- table content will be dynamically generated -->
+    </table>
+    <script>
+      var headers;
+      // Function to read CSV file and convert to array of objects
+      function parseCSV(csv) {
+        var lines = csv.split("\n");
+        var result = [];
+        headers = lines[0].split(",");
+        for (var i = 1; i < lines.length; i++) {
+          var obj = {};
+          var currentline = lines[i].split(",");
+          for (var j = 0; j < headers.length; j++) {
+            obj[headers[j]] = currentline[j];
+          }
+          result.push(obj);
+        }
+        return result;
+      }
+
+      // Function to generate HTML table from array of objects
+      function generateTable(data) {
+        var table = document.getElementById("csvTable");
+        var headers = Object.keys(data[0]);
+        var headerRow = document.createElement("tr");
+        for (var i = 0; i < headers.length; i++) {
+          var headerCell = document.createElement("th");
+          headerCell.textContent = headers[i];
+          headerRow.appendChild(headerCell);
+        }
+        table.appendChild(headerRow);
+        for (var i = 0; i < data.length; i++) {
+          var row = document.createElement("tr");
+          for (var j = 0; j < headers.length; j++) {
+            var cell = document.createElement("td");
+            cell.textContent = data[i][headers[j]];
+            row.appendChild(cell);
+          }
+          table.appendChild(row);
+        }
+      }
+
+      function applyFilter() {
+        // function applyFilter(filterField, filterValue) {
+        var filterField = document.getElementById("filterHeader").value;
+        var filterValue = document.getElementById("filterCriteria").value;
+
+        var table = document.getElementById("csvTable");
+        var rows = table.getElementsByTagName("tr");
+        for (var i = 1; i < rows.length; i++) {
+          //   console.log(i);
+          var cells = rows[i].getElementsByTagName("td");
+          //   var fieldValue = cells[headers.indexOf(filterField)].textContent;
+          if (fieldValue != filterValue) {
+            rows[i].style.display = "none";
+            // console.log(rows[i]);
+          } else {
+            rows[i].style.display = "";
+            // console.log(rows[i]);
+          }
+        }
+      }
+      // Load CSV file and generate HTML table
+      fetch("Air_Quality.csv")
+        .then((response) => response.text())
+        .then((csv) => {
+          var data = parseCSV(csv);
+          generateTable(data);
+          //applyFilter();
+        })
+        .catch((error) => console.error(error));
+
+      // filter
+    </script>
+  </body>
+</html>
