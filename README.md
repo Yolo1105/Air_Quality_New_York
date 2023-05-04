@@ -36,3 +36,5 @@
 
 - Usage of excel to put data in order
 - Generate the table without repeating data
+
+- https://jsbin.com/zimigekeyu/edit?js,console,output
