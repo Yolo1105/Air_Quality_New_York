@@ -22,10 +22,17 @@
 **useful.html**
 - Test for the inserted table if it can display the values correctly
 
-
 **API Implementationm - Leaflet**
-https://leafletjs.com/index.html
-Leaflet is designed with simplicity, performance and usability in mind. It works efficiently across all major desktop and mobile platforms, can be extended with lots of plugins, has a beautiful, easy to use and well-documented API and a simple, readable source code that is a joy to contribute to.
+- https://leafletjs.com/index.html
+- Leaflet is designed with simplicity, performance and usability in mind. It works efficiently across all major desktop and mobile platforms, can be extended with lots of plugins, has a beautiful, easy to use and well-documented API and a simple, readable source code that is a joy to contribute to.
 
 **Download Leaflet**
-https://leafletjs.com/download.html
+- https://leafletjs.com/download.html
+
+**Other Tips**
+- Usage of GoogleSheet to get the location address (GetLocations)
+- https://www.google.com/sheets/about/
+
+
+- Usage of excel to put data in order
+- Generate the table without repeating data
