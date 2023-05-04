@@ -184,7 +184,13 @@
       });
       L.Control.geocoder().addTo(map);
       map.setView([40.694, -73.9829], 14);
-
+      
+      L.marker([40.694, -73.9829], {
+        icon: customIcon,
+      })
+        .bindPopup("You are currently here!")
+        .addTo(map);
+      
       var searchLayer = L.geoJson().addTo(map);
       //... adding data in searchLayer ...
       L.map("map", { searchControl: { layer: searchLayer } });
